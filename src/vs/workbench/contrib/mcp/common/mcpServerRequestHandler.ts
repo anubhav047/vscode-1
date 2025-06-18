@@ -112,6 +112,7 @@ export class McpServerRequestHandler extends Disposable {
 						capabilities: {
 							roots: { listChanged: true },
 							sampling: opts.createMessageRequestHandler ? {} : undefined,
+							elicitation: opts.elicitationRequestHandler ? {} : undefined,
 						},
 						clientInfo: {
 							name: productService.nameLong,
