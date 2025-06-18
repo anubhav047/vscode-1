@@ -694,7 +694,7 @@ class ExtensionsScanner extends Disposable {
 		const id = getGalleryExtensionId(manifest.publisher, manifest.name);
 		const identifier = metadata?.id ? { id, uuid: metadata.id } : { id };
 		const type = metadata?.isSystem ? ExtensionType.System : input.type;
-		const isBuiltin = type === ExtensionType.System || !!metadata?.isBuiltin;
+		const isBuiltin = type === ExtensionType.System || !!metadata?.isBuiltin || !!(manifest as any).builtin;
 		try {
 			manifest = await this.translateManifest(input.location, manifest, ExtensionScannerInput.createNlsConfiguration(input));
 		} catch (error) {

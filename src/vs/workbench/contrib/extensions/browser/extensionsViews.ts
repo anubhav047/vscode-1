@@ -415,9 +415,17 @@ export class ExtensionsListView extends ViewPane {
 		let { value, includedCategories, excludedCategories } = this.parseCategories(query.value);
 		value = value.replaceAll(/@builtin/gi, '').replaceAll(/@sort:(\w+)(-\w*)?/g, '').trim().toLowerCase();
 
+		// Hide Wingman AI from builtin extensions list unless specifically searched for
+		const isWingmanSpecificSearch = value.includes('wingman') || value.includes('wing-man');
+
 		const result = local
-			.filter(e => e.isBuiltin && (e.name.toLowerCase().indexOf(value) > -1 || e.displayName.toLowerCase().indexOf(value) > -1)
-				&& this.filterExtensionByCategory(e, includedCategories, excludedCategories));
+			.filter(e => {
+				if (e.isBuiltin && (e.identifier.id === 'vscode-builtin.wing-man' || e.name === 'wing-man') && !isWingmanSpecificSearch) {
+					return false; // Hide Wingman AI unless specifically searched for
+				}
+				return e.isBuiltin && (e.name.toLowerCase().indexOf(value) > -1 || e.displayName.toLowerCase().indexOf(value) > -1)
+					&& this.filterExtensionByCategory(e, includedCategories, excludedCategories);
+			});
 
 		return this.sortExtensions(result, options);
 	}
@@ -462,13 +470,17 @@ export class ExtensionsListView extends ViewPane {
 
 		const matchingText = (e: IExtension) => (e.name.toLowerCase().indexOf(value) > -1 || e.displayName.toLowerCase().indexOf(value) > -1 || e.description.toLowerCase().indexOf(value) > -1)
 			&& this.filterExtensionByCategory(e, includedCategories, excludedCategories);
+
+		// Hide specific builtin extensions (like Wingman AI) from the Extensions panel
+		const isHiddenBuiltin = (e: IExtension) => e.isBuiltin && (e.identifier.id === 'vscode-builtin.wing-man' || e.name === 'wing-man');
+
 		let result;
 
 		if (options.sortBy !== undefined) {
-			result = local.filter(e => !e.isBuiltin && matchingText(e));
+			result = local.filter(e => !e.isBuiltin && matchingText(e) && !isHiddenBuiltin(e));
 			result = this.sortExtensions(result, options);
 		} else {
-			result = local.filter(e => (!e.isBuiltin || e.outdated || e.runtimeState !== undefined) && matchingText(e));
+			result = local.filter(e => (!e.isBuiltin || e.outdated || e.runtimeState !== undefined) && matchingText(e) && !isHiddenBuiltin(e));
 			const runningExtensionsById = runningExtensions.reduce((result, e) => { result.set(e.identifier.value, e); return result; }, new ExtensionIdentifierMap<IExtensionDescription>());
 
 			const defaultSort = (e1: IExtension, e2: IExtension) => {

@@ -46,6 +46,7 @@ const dirs = [
 	'extensions/vscode-colorize-tests',
 	'extensions/vscode-colorize-perf-tests',
 	'extensions/vscode-test-resolver',
+	'extensions/wingman-ai',
 	'remote',
 	'remote/web',
 	'test/automation',
